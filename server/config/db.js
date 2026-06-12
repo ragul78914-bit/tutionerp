@@ -1,5 +1,4 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+const Database = require('better-sqlite3');
 const path = require('path');
 require('dotenv').config();
 
@@ -13,24 +12,20 @@ const pool = {
     
     const upperSql = sql.trim().toUpperCase();
     if (upperSql.startsWith('SELECT') || upperSql.startsWith('WITH') || upperSql.startsWith('PRAGMA')) {
-      const rows = await db.all(sql, params);
+      const rows = db.prepare(sql).all(params);
       return [rows]; // Emulate mysql2
     } else {
-      const result = await db.run(sql, params);
-      return [{ insertId: result.lastID, affectedRows: result.changes }]; // Emulate mysql2 result object
+      const result = db.prepare(sql).run(params);
+      return [{ insertId: result.lastInsertRowid, affectedRows: result.changes }]; // Emulate mysql2 result object
     }
   }
 };
 
 // Create database and tables automatically
 async function initializeDatabase() {
-  db = await open({
-    filename: path.join(__dirname, '../database.sqlite'),
-    driver: sqlite3.Database
-  });
-
-  await db.exec('PRAGMA journal_mode = WAL;');
-  await db.exec('PRAGMA foreign_keys = ON;');
+  db = new Database(path.join(__dirname, '../database.sqlite'));
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
 
   // Create admins table
   await db.exec(`
@@ -136,13 +131,12 @@ async function initializeDatabase() {
 
   // Create default admin if not exists
   const bcrypt = require('bcryptjs');
-  const admins = await db.all('SELECT * FROM admins WHERE email = ?', [process.env.ADMIN_EMAIL || 'nixtion@gmail.com']);
+  const admins = db.prepare('SELECT * FROM admins WHERE email = ?').all([process.env.ADMIN_EMAIL || 'nixtion@gmail.com']);
   if (admins.length === 0) {
     const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'nixtion@123', 10);
-    await db.run(
-      'INSERT INTO admins (name, email, password) VALUES (?, ?, ?)',
-      [process.env.ADMIN_NAME || 'Nixtion Admin', process.env.ADMIN_EMAIL || 'nixtion@gmail.com', hashedPassword]
-    );
+    db.prepare(
+      'INSERT INTO admins (name, email, password) VALUES (?, ?, ?)'
+    ).run([process.env.ADMIN_NAME || 'Nixtion Admin', process.env.ADMIN_EMAIL || 'nixtion@gmail.com', hashedPassword]);
     console.log('✅ Default admin account created');
   }
 
