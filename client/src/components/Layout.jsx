@@ -3,21 +3,21 @@ import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { section: 'Main', items: [
-    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/', label: 'Dashboard', icon: '📊', end: true },
   ]},
   { section: 'Management', items: [
-    { path: '/students', label: 'Students', icon: '🎓' },
-    { path: '/attendance', label: 'Attendance', icon: '📋' },
-    { path: '/attendance/history', label: 'Attendance Report', icon: '📅' },
-    { path: '/fees', label: 'Fees', icon: '💰' },
-    { path: '/fees/report', label: 'Fee Report', icon: '📈' },
-    { path: '/marks', label: 'Subject Marks', icon: '📝' },
+    { path: '/students', label: 'Students', icon: '🎓', end: false },
+    { path: '/attendance', label: 'Attendance', icon: '📋', end: true },
+    { path: '/attendance/history', label: 'Attendance Report', icon: '📅', end: true },
+    { path: '/fees', label: 'Fees', icon: '💰', end: true },
+    { path: '/fees/report', label: 'Fee Report', icon: '📈', end: true },
+    { path: '/marks', label: 'Subject Marks', icon: '📝', end: true },
   ]},
   { section: 'Communication', items: [
-    { path: '/notifications', label: 'Notifications', icon: '🔔' },
+    { path: '/notifications', label: 'Notifications', icon: '🔔', end: true },
   ]},
   { section: 'System', items: [
-    { path: '/settings', label: 'Settings', icon: '⚙️' },
+    { path: '/settings', label: 'Settings', icon: '⚙️', end: true },
   ]},
 ];
 
@@ -58,7 +58,7 @@ export default function Layout() {
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  end={item.path === '/'}
+                  end={item.end}
                   className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                 >
                   <span className="nav-icon">{item.icon}</span>
