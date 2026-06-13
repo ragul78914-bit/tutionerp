@@ -20,7 +20,7 @@ const autoCreateCurrentMonthFees = async () => {
     }
 
     // Get all active students
-    const [students] = await pool.query('SELECT id FROM students WHERE status = "Active"');
+    const [students] = await pool.query("SELECT id FROM students WHERE status = 'Active'");
     if (students.length === 0) return;
 
     // Find fallback default amount
@@ -63,7 +63,7 @@ const autoCreateCurrentMonthFees = async () => {
       }
 
       await pool.query(
-        'INSERT INTO fees (student_id, month, year, amount, paid_amount, due_date, status) VALUES (?, ?, ?, ?, 0, ?, "Pending")',
+        "INSERT INTO fees (student_id, month, year, amount, paid_amount, due_date, status) VALUES (?, ?, ?, ?, 0, ?, 'Pending')",
         [s.id, currentMonth, currentYear, amount, due_date]
       );
     }
@@ -111,7 +111,7 @@ router.post('/', authMiddleware, async (req, res) => {
     if (!month || !year || !amount || !due_date) return res.status(400).json({ message: 'Month, year, amount, and due date are required' });
     let targetIds = student_ids;
     if (!targetIds || targetIds.length === 0) {
-      const [students] = await pool.query('SELECT id FROM students WHERE status = "Active"');
+      const [students] = await pool.query("SELECT id FROM students WHERE status = 'Active'");
       targetIds = students.map(s => s.id);
     }
     let created = 0, skipped = 0;

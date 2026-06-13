@@ -10,19 +10,22 @@ router.get('/', authMiddleware, async (req, res) => {
     const currentMonth = new Date().getMonth() + 1;
     const currentYear = new Date().getFullYear();
 
-    const [totalStudents] = await pool.query('SELECT COUNT(*) as count FROM students WHERE status = "Active"');
-    const [boys] = await pool.query('SELECT COUNT(*) as count FROM students WHERE gender = "Boy" AND status = "Active"');
-    const [girls] = await pool.query('SELECT COUNT(*) as count FROM students WHERE gender = "Girl" AND status = "Active"');
-    const [presentToday] = await pool.query('SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = "Present"', [today]);
-    const [absentToday] = await pool.query('SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = "Absent"', [today]);
-    const [lateToday] = await pool.query('SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = "Late"', [today]);
+    const [totalStudents] = await pool.query("SELECT COUNT(*) as count FROM students WHERE status = 'Active'");
+    const [boys] = await pool.query("SELECT COUNT(*) as count FROM students WHERE gender = 'Boy' AND status = 'Active'");
+    const [girls] = await pool.query("SELECT COUNT(*) as count FROM students WHERE gender = 'Girl' AND status = 'Active'");
+    const [presentToday] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = 'Present'", [today]);
+    const [absentToday] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = 'Absent'", [today]);
+    const [lateToday] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE date = ? AND status = 'Late'", [today]);
     const [totalAttendanceToday] = await pool.query('SELECT COUNT(*) as count FROM attendance WHERE date = ?', [today]);
 
     const attendancePercentage = totalAttendanceToday[0].count > 0
       ? (((presentToday[0].count + lateToday[0].count) / totalAttendanceToday[0].count) * 100).toFixed(1) : 0;
 
-    const [pendingFees] = await pool.query('SELECT COUNT(*) as count, COALESCE(SUM(amount - paid_amount), 0) as total FROM fees WHERE status IN ("Pending", "Overdue")');
-    const [monthlyCollection] = await pool.query('SELECT COALESCE(SUM(paid_amount), 0) as total FROM fees WHERE CAST(strftime(\'%m\', paid_date) AS INTEGER) = ? AND CAST(strftime(\'%Y\', paid_date) AS INTEGER) = ? AND status = "Paid"', [currentMonth, currentYear]);
+    const [pendingFees] = await pool.query("SELECT COUNT(*) as count, COALESCE(SUM(amount - paid_amount), 0) as total FROM fees WHERE status IN ('Pending', 'Overdue')");
+    const [monthlyCollection] = await pool.query(
+      `SELECT COALESCE(SUM(paid_amount), 0) as total FROM fees WHERE CAST(strftime('%m', paid_date) AS INTEGER) = ? AND CAST(strftime('%Y', paid_date) AS INTEGER) = ? AND status = 'Paid'`,
+      [currentMonth, currentYear]
+    );
 
     const [upcomingTests] = await pool.query('SELECT id, name, class_batch, exam_date as date FROM subjects WHERE exam_date >= ? ORDER BY exam_date ASC LIMIT 5', [today]);
     const [recentNotifications] = await pool.query('SELECT n.*, s.name as student_name FROM notifications n LEFT JOIN students s ON n.student_id = s.id ORDER BY n.sent_at DESC LIMIT 10');
@@ -54,7 +57,10 @@ router.get('/', authMiddleware, async (req, res) => {
       recentNotifications,
       attendanceTrend
     });
-  } catch (error) { console.error('Dashboard error:', error); res.status(500).json({ message: 'Server error' }); }
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;

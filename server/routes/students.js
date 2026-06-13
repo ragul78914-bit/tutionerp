@@ -58,10 +58,10 @@ router.get('/', authMiddleware, async (req, res) => {
 // GET /api/students/stats - Student statistics
 router.get('/stats', authMiddleware, async (req, res) => {
   try {
-    const [total] = await pool.query('SELECT COUNT(*) as count FROM students WHERE status = "Active"');
-    const [boys] = await pool.query('SELECT COUNT(*) as count FROM students WHERE gender = "Boy" AND status = "Active"');
-    const [girls] = await pool.query('SELECT COUNT(*) as count FROM students WHERE gender = "Girl" AND status = "Active"');
-    const [classes] = await pool.query('SELECT DISTINCT class_batch FROM students WHERE status = "Active" ORDER BY class_batch');
+    const [total] = await pool.query("SELECT COUNT(*) as count FROM students WHERE status = 'Active'");
+    const [boys] = await pool.query("SELECT COUNT(*) as count FROM students WHERE gender = 'Boy' AND status = 'Active'");
+    const [girls] = await pool.query("SELECT COUNT(*) as count FROM students WHERE gender = 'Girl' AND status = 'Active'");
+    const [classes] = await pool.query("SELECT DISTINCT class_batch FROM students WHERE status = 'Active' ORDER BY class_batch");
     
     res.json({
       total: total[0].count,
@@ -141,7 +141,7 @@ router.get('/:id/profile', authMiddleware, async (req, res) => {
     const overallStatus = overallPercentage >= 35 ? 'PASS' : 'FAIL';
 
     // 5. Rank calculation
-    const [classStudents] = await pool.query('SELECT id FROM students WHERE class_batch = ? AND status = "Active"', [student.class_batch]);
+    const [classStudents] = await pool.query("SELECT id FROM students WHERE class_batch = ? AND status = 'Active'", [student.class_batch]);
     const studentScores = [];
     for (const cs of classStudents) {
       const [csMarks] = await pool.query(`
