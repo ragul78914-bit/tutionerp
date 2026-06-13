@@ -1,0 +1,43 @@
+services:
+  # Backend API (Express + SQLite)
+  - type: web
+    name: tuition-erp-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: nixtion@gmail.com
+      - key: ADMIN_PASSWORD
+        value: nixtion@123
+      - key: ADMIN_NAME
+        value: Nixtion Admin
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+
+  # Frontend (React/Vite) - deployed as static site
+  - type: web
+    name: tuition-erp-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: tuition-erp-api
+          type: web
+          property: host
