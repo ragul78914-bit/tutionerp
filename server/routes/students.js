@@ -112,7 +112,7 @@ router.get('/:id/profile', authMiddleware, async (req, res) => {
       : 100;
 
     // 3. Fee history & pending
-    const [fees] = await pool.query('SELECT * FROM fees WHERE student_id = ? ORDER BY year DESC, FIELD(month, "December", "November", "October", "September", "August", "July", "June", "May", "April", "March", "February", "January")', [studentId]);
+    const [fees] = await pool.query(`SELECT * FROM fees WHERE student_id = ? ORDER BY year DESC, CASE month WHEN 'December' THEN 12 WHEN 'November' THEN 11 WHEN 'October' THEN 10 WHEN 'September' THEN 9 WHEN 'August' THEN 8 WHEN 'July' THEN 7 WHEN 'June' THEN 6 WHEN 'May' THEN 5 WHEN 'April' THEN 4 WHEN 'March' THEN 3 WHEN 'February' THEN 2 WHEN 'January' THEN 1 ELSE 0 END DESC`, [studentId]);
     const totalFeesPaid = fees.reduce((sum, f) => sum + parseFloat(f.paid_amount || 0), 0);
     const totalFeesPending = fees.reduce((sum, f) => sum + (parseFloat(f.amount) - parseFloat(f.paid_amount || 0)), 0);
 

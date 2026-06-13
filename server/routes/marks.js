@@ -63,8 +63,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
     for (const m of marks) {
       await pool.query(
-        'INSERT INTO subject_marks (subject_id, student_id, marks_obtained) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE marks_obtained = ?',
-        [subject_id, m.student_id, m.marks_obtained, m.marks_obtained]
+        'INSERT INTO subject_marks (subject_id, student_id, marks_obtained) VALUES (?, ?, ?) ON CONFLICT(subject_id, student_id) DO UPDATE SET marks_obtained = excluded.marks_obtained',
+        [subject_id, m.student_id, m.marks_obtained]
       );
     }
 

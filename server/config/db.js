@@ -10,12 +10,15 @@ const pool = {
       throw new Error('Database not initialized');
     }
     
+    // Flatten array: better-sqlite3 requires spread params, not an array
+    const flatParams = Array.isArray(params) ? params : [params];
+    
     const upperSql = sql.trim().toUpperCase();
     if (upperSql.startsWith('SELECT') || upperSql.startsWith('WITH') || upperSql.startsWith('PRAGMA')) {
-      const rows = db.prepare(sql).all(params);
+      const rows = db.prepare(sql).all(...flatParams);
       return [rows]; // Emulate mysql2
     } else {
-      const result = db.prepare(sql).run(params);
+      const result = db.prepare(sql).run(...flatParams);
       return [{ insertId: result.lastInsertRowid, affectedRows: result.changes }]; // Emulate mysql2 result object
     }
   }
